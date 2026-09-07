@@ -1,0 +1,85 @@
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DB_NAME:-csv_manager}
+      POSTGRES_USER: ${DB_USER:-csv_user}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD debe definirse en el archivo .env}
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    ports:
+      - "${DB_HOST_PORT:-5433}:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-csv_user} -d ${DB_NAME:-csv_manager}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # Emulador de S3, SOLO para quien no tenga una cuenta de AWS a mano.
+  # No se levanta con `docker compose up` por defecto (requiere el profile "local"):
+  #   docker compose --profile local up
+  # y en ese caso el .env debe apuntar S3_ENDPOINT a http://localstack:4566.
+  # Por defecto (sin profile) el backend habla directo con el S3 real de AWS
+  # usando las credenciales/bucket definidos en .env.
+  localstack:
+    image: localstack/localstack:3
+    restart: unless-stopped
+    profiles:
+      - local
+    environment:
+      SERVICES: s3
+      DEFAULT_REGION: ${AWS_REGION:-us-east-1}
+    ports:
+      - "4566:4566"
+    volumes:
+      - localstack_data:/var/lib/localstack
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4566/_localstack/health"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  backend:
+    build:
+      context: ./backend
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 4000
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_NAME: ${DB_NAME:-csv_manager}
+      DB_USER: ${DB_USER:-csv_user}
+      DB_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD debe definirse en el archivo .env}
+      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET debe definirse en el archivo .env}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-8h}
+      CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:5173}
+      MAX_FILE_SIZE_MB: ${MAX_FILE_SIZE_MB:-5}
+      AWS_REGION: ${AWS_REGION:?AWS_REGION debe definirse en el archivo .env}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:?AWS_ACCESS_KEY_ID debe definirse en el archivo .env}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:?AWS_SECRET_ACCESS_KEY debe definirse en el archivo .env}
+      S3_BUCKET_NAME: ${S3_BUCKET_NAME:?S3_BUCKET_NAME debe definirse en el archivo .env}
+      # Vacios por defecto = S3 real de AWS. Solo se completan con el profile "local".
+      S3_ENDPOINT: ${S3_ENDPOINT:-}
+      S3_FORCE_PATH_STYLE: ${S3_FORCE_PATH_STYLE:-false}
+    ports:
+      - "4000:4000"
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        VITE_API_URL: http://localhost:4000/api
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "5173:80"
+
+volumes:
+  db_data:
+  localstack_data:
