@@ -9,11 +9,11 @@ import {
 
 export class Record extends Model<InferAttributes<Record>, InferCreationAttributes<Record>> {
   declare id: CreationOptional<number>;
-  declare correo: string;
-  declare nombre: string;
-  declare telefono: string;
-  declare ciudad: string;
-  declare notas: string | null;
+  declare email: string;
+  declare fullName: string;
+  declare phone: string;
+  declare city: string;
+  declare notes: string | null;
   declare documentId: number;
 }
 
@@ -25,30 +25,29 @@ export default function defineRecord(sequelize: Sequelize): typeof Record {
         primaryKey: true,
         autoIncrement: true,
       },
-      correo: {
+      email: {
         type: DataTypes.STRING(255),
         allowNull: false,
       },
-      nombre: {
+      fullName: {
         type: DataTypes.STRING(255),
         allowNull: false,
       },
-      telefono: {
+      phone: {
         type: DataTypes.STRING(30),
         allowNull: false,
       },
-      ciudad: {
+      city: {
         type: DataTypes.STRING(120),
         allowNull: false,
       },
-      notas: {
+      notes: {
         type: DataTypes.TEXT,
         allowNull: true,
       },
       documentId: {
         type: DataTypes.INTEGER,
         allowNull: false,
-        field: 'document_id',
       },
     },
     {

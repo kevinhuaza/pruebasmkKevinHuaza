@@ -79,14 +79,12 @@ const env: EnvConfig = {
     localDir: process.env.UPLOAD_DIR || 'uploads',
   },
 
-  // Solo se usa si STORAGE_DRIVER=s3. No hace falta completar nada aqui
-  // para el modo por defecto (almacenamiento local).
+  
   aws: {
     region: process.env.AWS_REGION || 'us-east-1',
     accessKeyId: process.env.AWS_ACCESS_KEY_ID,
     secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-    bucket: required('S3_BUCKET_NAME', 'csv-manager-documents'),
-    // S3_ENDPOINT: dejar vacio para AWS real; se usa para apuntar a LocalStack en local/Docker.
+    bucket: required('S3_BUCKET_NAME', 'csv-manager-documents'),   
     endpoint: process.env.S3_ENDPOINT || undefined,
     forcePathStyle: (process.env.S3_FORCE_PATH_STYLE || 'false') === 'true',
   },

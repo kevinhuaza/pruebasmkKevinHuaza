@@ -39,7 +39,7 @@ describe('document.service', () => {
   describe('uploadDocument', () => {
     it('sube el CSV a S3 y guarda el documento y sus registros cuando es valido', async () => {
       mockedParse.mockReturnValue([
-        { correo: 'a@a.com', nombre: 'A', telefono: '123', ciudad: 'Lima', notas: null },
+        { email: 'a@a.com', fullName: 'A', phone: '123', city: 'Lima', notes: null },
       ]);
       mockedStorage.uploadObject.mockResolvedValue(undefined);
       mockedDocument.create.mockResolvedValue({ id: 10 });
@@ -57,7 +57,7 @@ describe('document.service', () => {
         expect.anything()
       );
       expect(mockedRecord.bulkCreate).toHaveBeenCalledWith(
-        [expect.objectContaining({ correo: 'a@a.com', documentId: 10 })],
+        [expect.objectContaining({ email: 'a@a.com', documentId: 10 })],
         expect.anything()
       );
       expect(result).toEqual({ id: 10, originalName: 'clientes.csv' });
@@ -79,7 +79,7 @@ describe('document.service', () => {
 
     it('borra el objeto de S3 (compensacion) si la transaccion de BD falla', async () => {
       mockedParse.mockReturnValue([
-        { correo: 'a@a.com', nombre: 'A', telefono: '123', ciudad: 'Lima', notas: null },
+        { email: 'a@a.com', fullName: 'A', phone: '123', city: 'Lima', notes: null },
       ]);
       mockedStorage.uploadObject.mockResolvedValue(undefined);
       mockedStorage.deleteObject.mockResolvedValue(undefined);
