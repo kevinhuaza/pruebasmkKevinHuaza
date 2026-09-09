@@ -45,10 +45,12 @@
         <div class="field">
           <label>Rol</label>
           <div class="radio-group">
-            
+            <label><input v-model="form.role" type="radio" value="user" /> Usuario</label>
+            <label><input v-model="form.role" type="radio" value="admin" /> Administrador</label>
           </div>
           <p class="field-hint">
-           
+            El rol admin solo se respeta para la primera cuenta del sistema; despues, el registro
+            publico siempre crea usuarios con rol "user".
           </p>
         </div>
 
