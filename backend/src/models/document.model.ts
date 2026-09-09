@@ -11,14 +11,15 @@ import { User } from './user.model';
 
 export class Document extends Model<InferAttributes<Document>, InferCreationAttributes<Document>> {
   declare id: CreationOptional<number>;
-  declare nombreOriginal: string;
-  declare nombreAlmacenado: string;
-  declare rutaArchivo: string;
-  declare numRegistros: CreationOptional<number>;
-  declare usuarioId: number;
-  declare fecha_carga: CreationOptional<Date>;
+  declare originalName: string;
+  declare storedName: string;
+  declare storageKey: string;
+  declare recordCount: CreationOptional<number>;
+  declare userId: number;
+  declare uploadedAt: CreationOptional<Date>;
+  declare deletedAt: CreationOptional<Date | null>;
 
-  declare usuario?: NonAttribute<User>;
+  declare uploadedBy?: NonAttribute<User>;
 }
 
 export default function defineDocument(sequelize: Sequelize): typeof Document {
@@ -29,36 +30,35 @@ export default function defineDocument(sequelize: Sequelize): typeof Document {
         primaryKey: true,
         autoIncrement: true,
       },
-      nombreOriginal: {
+      originalName: {
         type: DataTypes.STRING(255),
         allowNull: false,
-        field: 'nombre_original',
       },
-      nombreAlmacenado: {
+      storedName: {
         type: DataTypes.STRING(255),
         allowNull: false,
-        field: 'nombre_almacenado',
       },
-      rutaArchivo: {
+      storageKey: {
         type: DataTypes.STRING(500),
         allowNull: false,
-        field: 'ruta_archivo',
       },
-      numRegistros: {
+      recordCount: {
         type: DataTypes.INTEGER,
         allowNull: false,
         defaultValue: 0,
-        field: 'num_registros',
       },
-      usuarioId: {
+      userId: {
         type: DataTypes.INTEGER,
         allowNull: false,
-        field: 'usuario_id',
       },
-      fecha_carga: {
+      uploadedAt: {
         type: DataTypes.DATE,
         allowNull: false,
         defaultValue: DataTypes.NOW,
+      },
+      deletedAt: {
+        type: DataTypes.DATE,
+        allowNull: true,
       },
     },
     {
@@ -66,8 +66,9 @@ export default function defineDocument(sequelize: Sequelize): typeof Document {
       modelName: 'Document',
       tableName: 'documents',
       timestamps: true,
-      createdAt: 'fecha_carga',
+      createdAt: 'uploadedAt',
       updatedAt: false,
+      paranoid: true,
     }
   );
 

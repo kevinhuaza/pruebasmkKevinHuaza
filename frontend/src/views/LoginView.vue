@@ -8,8 +8,14 @@
 
       <form @submit.prevent="handleSubmit">
         <div class="field">
-          <label for="nombre">Usuario</label>
-          <input id="nombre" v-model.trim="form.nombre" type="text" autocomplete="username" required />
+          <label for="username">Usuario</label>
+          <input
+            id="username"
+            v-model.trim="form.username"
+            type="text"
+            autocomplete="username"
+            required
+          />
         </div>
 
         <div class="field">
@@ -48,7 +54,7 @@ export default defineComponent({
   components: { AlertMessage, AppLogo },
   data() {
     return {
-      form: { nombre: '', password: '' },
+      form: { username: '', password: '' },
       loading: false,
       errorMessage: '',
     };

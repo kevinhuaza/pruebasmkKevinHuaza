@@ -5,12 +5,7 @@ export function readFileAsText(file: File): Promise<string> {
   return file.text();
 }
 
-/**
- * Reconstruye el CSV original agregando una columna "errores" con el detalle
- * de validacion de cada fila (vacia si la fila era valida).
- *
- * `rowErrorDetails` es el arreglo `details` que retorna el backend en un 422.
- */
+
 export function buildCsvWithErrorColumn(
   csvText: string,
   rowErrorDetails: CsvRowErrorDetail[] = []

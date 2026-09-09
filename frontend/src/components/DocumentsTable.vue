@@ -15,10 +15,10 @@
       </thead>
       <tbody>
         <tr v-for="doc in documents" :key="doc.id">
-          <td>{{ doc.nombreOriginal }}</td>
-          <td>{{ doc.usuario?.nombre }}</td>
-          <td>{{ formatDate(doc.fecha_carga) }}</td>
-          <td>{{ doc.numRegistros }}</td>
+          <td>{{ doc.originalName }}</td>
+          <td>{{ doc.uploadedBy?.username }}</td>
+          <td>{{ formatDate(doc.uploadedAt) }}</td>
+          <td>{{ doc.recordCount }}</td>
           <td class="actions-cell">
             <button class="btn btn-secondary btn-sm" @click="$emit('download', doc)">
               Descargar

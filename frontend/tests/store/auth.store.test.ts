@@ -25,11 +25,11 @@ describe('store/auth', () => {
 
   it('login guarda el token y el usuario en el estado y en localStorage', async () => {
     mockedPost.mockResolvedValue({
-      data: { data: { token: 'jwt-token', user: { id: 1, nombre: 'juan', rol: 'admin' } } },
+      data: { data: { token: 'jwt-token', user: { id: 1, username: 'juan', role: 'admin' } } },
     });
 
     const store = useAuthStore();
-    await store.login({ nombre: 'juan', password: 'secret123' });
+    await store.login({ username: 'juan', password: 'secret123' });
 
     expect(store.token).toBe('jwt-token');
     expect(store.isAuthenticated).toBe(true);
@@ -39,10 +39,10 @@ describe('store/auth', () => {
 
   it('logout limpia el estado y localStorage', async () => {
     mockedPost.mockResolvedValue({
-      data: { data: { token: 'jwt-token', user: { id: 1, nombre: 'juan', rol: 'user' } } },
+      data: { data: { token: 'jwt-token', user: { id: 1, username: 'juan', role: 'user' } } },
     });
     const store = useAuthStore();
-    await store.login({ nombre: 'juan', password: 'secret123' });
+    await store.login({ username: 'juan', password: 'secret123' });
 
     store.logout();
 
@@ -52,17 +52,20 @@ describe('store/auth', () => {
   });
 
   it('register delega en el cliente HTTP y retorna los datos del usuario creado', async () => {
-    mockedPost.mockResolvedValue({ data: { data: { id: 1, nombre: 'juan', rol: 'user' } } });
+    mockedPost.mockResolvedValue({ data: { data: { id: 1, username: 'juan', role: 'user' } } });
 
     const store = useAuthStore();
     const result = await store.register({
-      nombre: 'juan',
+      username: 'juan',
       password: 'secret123',
-      confirmarContrasena: 'secret123',
-      rol: 'user',
+      confirmPassword: 'secret123',
+      role: 'user',
     });
 
-    expect(mockedPost).toHaveBeenCalledWith('/auth/register', expect.objectContaining({ nombre: 'juan' }));
-    expect(result).toEqual({ id: 1, nombre: 'juan', rol: 'user' });
+    expect(mockedPost).toHaveBeenCalledWith(
+      '/auth/register',
+      expect.objectContaining({ username: 'juan' })
+    );
+    expect(result).toEqual({ id: 1, username: 'juan', role: 'user' });
   });
 });

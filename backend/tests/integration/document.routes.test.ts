@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
 
-let mockCurrentUser: { id: number; nombre: string; rol: 'user' | 'admin' } | null = null;
+let mockCurrentUser: { id: number; username: string; role: 'user' | 'admin' } | null = null;
 
 jest.mock(
   '../../src/middlewares/auth.middleware',
@@ -39,9 +39,9 @@ describe('GET /api/documents', () => {
   });
 
   it('retorna la lista de documentos para un usuario autenticado', async () => {
-    mockCurrentUser = { id: 1, nombre: 'juan', rol: 'user' };
+    mockCurrentUser = { id: 1, username: 'juan', role: 'user' };
     mockedDocumentService.listDocuments.mockResolvedValue([
-      { id: 1, nombreOriginal: 'a.csv' },
+      { id: 1, originalName: 'a.csv' },
     ] as never);
 
     const res = await request(app).get('/api/documents');
@@ -58,7 +58,7 @@ describe('GET /api/documents/template', () => {
   });
 
   it('transmite el CSV de la plantilla para un usuario autenticado', async () => {
-    mockCurrentUser = { id: 1, nombre: 'juan', rol: 'user' };
+    mockCurrentUser = { id: 1, username: 'juan', role: 'user' };
     mockedTemplateService.getTemplateStream.mockResolvedValue(
       Readable.from(['correo,nombre,telefono,ciudad,notas\n'])
     );
@@ -74,7 +74,7 @@ describe('GET /api/documents/template', () => {
 
 describe('DELETE /api/documents/:id (RBAC)', () => {
   it('retorna 403 cuando el usuario autenticado no es admin', async () => {
-    mockCurrentUser = { id: 2, nombre: 'user_normal', rol: 'user' };
+    mockCurrentUser = { id: 2, username: 'user_normal', role: 'user' };
 
     const res = await request(app).delete('/api/documents/1');
 
@@ -83,7 +83,7 @@ describe('DELETE /api/documents/:id (RBAC)', () => {
   });
 
   it('permite eliminar cuando el usuario autenticado es admin', async () => {
-    mockCurrentUser = { id: 1, nombre: 'admin_test', rol: 'admin' };
+    mockCurrentUser = { id: 1, username: 'admin_test', role: 'admin' };
     mockedDocumentService.deleteDocument.mockResolvedValue(undefined);
 
     const res = await request(app).delete('/api/documents/1');
@@ -93,7 +93,7 @@ describe('DELETE /api/documents/:id (RBAC)', () => {
   });
 
   it('retorna 404 cuando el documento no existe', async () => {
-    mockCurrentUser = { id: 1, nombre: 'admin_test', rol: 'admin' };
+    mockCurrentUser = { id: 1, username: 'admin_test', role: 'admin' };
     mockedDocumentService.deleteDocument.mockRejectedValue(
       ApiError.notFound('Documento no encontrado')
     );

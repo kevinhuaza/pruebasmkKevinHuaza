@@ -28,10 +28,10 @@ export const list = catchAsync(async (req: Request, res: Response) => {
 
 export const download = catchAsync(async (req: Request, res: Response) => {
   const document = await documentService.getDocumentById(req.params.id);
-  const stream = await storageService.getObjectStream(document.rutaArchivo);
+  const stream = await storageService.getObjectStream(document.storageKey);
 
   res.setHeader('Content-Type', 'text/csv');
-  res.setHeader('Content-Disposition', `attachment; filename="${document.nombreOriginal}"`);
+  res.setHeader('Content-Disposition', `attachment; filename="${document.originalName}"`);
 
   stream.on('error', () => {
     res.destroy();

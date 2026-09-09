@@ -2,36 +2,36 @@ export type UserRole = 'user' | 'admin';
 
 export interface AuthUser {
   id: number;
-  nombre: string;
-  rol: UserRole;
+  username: string;
+  role: UserRole;
 }
 
 export interface LoginPayload {
-  nombre: string;
+  username: string;
   password: string;
 }
 
 export interface RegisterPayload {
-  nombre: string;
+  username: string;
   password: string;
-  confirmarContrasena: string;
-  rol: UserRole;
+  confirmPassword: string;
+  role: UserRole;
 }
 
 export interface DocumentOwner {
   id: number;
-  nombre: string;
+  username: string;
 }
 
 export interface CsvDocument {
   id: number;
-  nombreOriginal: string;
-  nombreAlmacenado: string;
-  rutaArchivo: string;
-  numRegistros: number;
-  usuarioId: number;
-  fecha_carga: string;
-  usuario?: DocumentOwner;
+  originalName: string;
+  storedName: string;
+  storageKey: string;
+  recordCount: number;
+  userId: number;
+  uploadedAt: string;
+  uploadedBy?: DocumentOwner;
 }
 
 export interface CsvFieldError {

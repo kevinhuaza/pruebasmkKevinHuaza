@@ -15,12 +15,12 @@ const mockedDelete = apiClient.delete as unknown as ReturnType<typeof vi.fn>;
 
 const sampleDoc: CsvDocument = {
   id: 1,
-  nombreOriginal: 'clientes.csv',
-  nombreAlmacenado: 'uuid.csv',
-  rutaArchivo: 'documents/uuid.csv',
-  numRegistros: 2,
-  usuarioId: 1,
-  fecha_carga: '2026-01-01T00:00:00.000Z',
+  originalName: 'clientes.csv',
+  storedName: 'uuid.csv',
+  storageKey: 'documents/uuid.csv',
+  recordCount: 2,
+  userId: 1,
+  uploadedAt: '2026-01-01T00:00:00.000Z',
 };
 
 describe('store/documents', () => {

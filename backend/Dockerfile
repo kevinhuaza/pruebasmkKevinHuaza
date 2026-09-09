@@ -17,6 +17,8 @@ RUN npm install --omit=dev
 
 COPY --from=build /app/dist ./dist
 
+RUN mkdir -p uploads
+
 EXPOSE 4000
 
 CMD ["node", "dist/server.js"]

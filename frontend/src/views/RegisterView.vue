@@ -9,8 +9,14 @@
 
       <form @submit.prevent="handleSubmit">
         <div class="field">
-          <label for="nombre">Nombre</label>
-          <input id="nombre" v-model.trim="form.nombre" type="text" autocomplete="username" required />
+          <label for="username">Nombre</label>
+          <input
+            id="username"
+            v-model.trim="form.username"
+            type="text"
+            autocomplete="username"
+            required
+          />
         </div>
 
         <div class="field">
@@ -28,7 +34,7 @@
           <label for="confirmar">Confirmar Contrasena</label>
           <input
             id="confirmar"
-            v-model="form.confirmarContrasena"
+            v-model="form.confirmPassword"
             type="password"
             autocomplete="new-password"
             required
@@ -39,9 +45,11 @@
         <div class="field">
           <label>Rol</label>
           <div class="radio-group">
-            <label><input v-model="form.rol" type="radio" value="user" /> User</label>
-            <label><input v-model="form.rol" type="radio" value="admin" /> Admin</label>
+            
           </div>
+          <p class="field-hint">
+           
+          </p>
         </div>
 
         <button class="btn" type="submit" :disabled="loading || passwordMismatch">
@@ -71,10 +79,10 @@ export default defineComponent({
   data() {
     return {
       form: {
-        nombre: '',
+        username: '',
         password: '',
-        confirmarContrasena: '',
-        rol: 'user' as UserRole,
+        confirmPassword: '',
+        role: 'user' as UserRole,
       },
       loading: false,
       errorMessage: '',
@@ -85,7 +93,7 @@ export default defineComponent({
   computed: {
     passwordMismatch(): boolean {
       return (
-        this.form.confirmarContrasena.length > 0 && this.form.password !== this.form.confirmarContrasena
+        this.form.confirmPassword.length > 0 && this.form.password !== this.form.confirmPassword
       );
     },
   },

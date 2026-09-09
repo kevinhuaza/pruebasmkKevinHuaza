@@ -20,14 +20,14 @@ const authenticate = catchAsync(async (req: Request, res: Response, next: NextFu
   }
 
   const user = await User.findByPk(payload.sub, {
-    attributes: ['id', 'nombre', 'rol'],
+    attributes: ['id', 'username', 'role'],
   });
 
   if (!user) {
     throw ApiError.unauthorized('El usuario asociado al token ya no existe');
   }
 
-  req.user = { id: user.id, nombre: user.nombre, rol: user.rol };
+  req.user = { id: user.id, username: user.username, role: user.role };
   next();
 });
 

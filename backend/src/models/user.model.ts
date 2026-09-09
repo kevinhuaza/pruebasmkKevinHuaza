@@ -11,9 +11,9 @@ export type UserRole = 'user' | 'admin';
 
 export class User extends Model<InferAttributes<User>, InferCreationAttributes<User>> {
   declare id: CreationOptional<number>;
-  declare nombre: string;
+  declare username: string;
   declare password: string;
-  declare rol: UserRole;
+  declare role: UserRole;
 }
 
 export default function defineUser(sequelize: Sequelize): typeof User {
@@ -24,20 +24,20 @@ export default function defineUser(sequelize: Sequelize): typeof User {
         primaryKey: true,
         autoIncrement: true,
       },
-      nombre: {
+      username: {
         type: DataTypes.STRING(80),
         allowNull: false,
         unique: true,
         validate: {
-          notEmpty: { msg: 'El nombre es obligatorio' },
-          len: { args: [3, 80], msg: 'El nombre debe tener entre 3 y 80 caracteres' },
+          notEmpty: { msg: 'El nombre de usuario es obligatorio' },
+          len: { args: [3, 80], msg: 'El nombre de usuario debe tener entre 3 y 80 caracteres' },
         },
       },
       password: {
         type: DataTypes.STRING,
         allowNull: false,
       },
-      rol: {
+      role: {
         type: DataTypes.ENUM('user', 'admin'),
         allowNull: false,
         defaultValue: 'user',

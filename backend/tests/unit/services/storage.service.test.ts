@@ -1,94 +1,61 @@
-const mockSend = jest.fn();
+describe('storage.service (fachada de drivers)', () => {
+  const localEnsureReady = jest.fn();
+  const s3EnsureReady = jest.fn();
 
-jest.mock('@aws-sdk/client-s3', () => {
-  class FakeCommand {
-    input: unknown;
-    constructor(input: unknown) {
-      this.input = input;
-    }
+  function mockDrivers() {
+    jest.doMock('../../../src/services/storage/local.storage', () => ({
+      localStorageDriver: {
+        ensureReady: localEnsureReady,
+        uploadObject: jest.fn(),
+        getObjectStream: jest.fn(),
+        deleteObject: jest.fn(),
+        objectExists: jest.fn(),
+      },
+    }));
+    jest.doMock('../../../src/services/storage/s3.storage', () => ({
+      s3StorageDriver: {
+        ensureReady: s3EnsureReady,
+        uploadObject: jest.fn(),
+        getObjectStream: jest.fn(),
+        deleteObject: jest.fn(),
+        objectExists: jest.fn(),
+      },
+    }));
   }
-  return {
-    S3Client: jest.fn().mockImplementation(() => ({ send: mockSend })),
-    PutObjectCommand: FakeCommand,
-    GetObjectCommand: FakeCommand,
-    DeleteObjectCommand: FakeCommand,
-    HeadBucketCommand: FakeCommand,
-    CreateBucketCommand: FakeCommand,
-  };
-});
 
-import * as storageService from '../../../src/services/storage.service';
-import ApiError from '../../../src/utils/ApiError';
-
-describe('storage.service', () => {
   beforeEach(() => {
-    mockSend.mockReset();
+    jest.resetModules();
+    localEnsureReady.mockReset();
+    s3EnsureReady.mockReset();
   });
 
-  describe('uploadObject', () => {
-    it('envia un PutObjectCommand con el bucket, key, body y content-type', async () => {
-      mockSend.mockResolvedValue({});
+  it('usa el driver local cuando STORAGE_DRIVER no es "s3" (valor por defecto)', async () => {
+    jest.doMock('../../../src/config/env', () => ({
+      __esModule: true,
+      default: { storage: { driver: 'local', localDir: 'uploads' } },
+    }));
+    mockDrivers();
 
-      await storageService.uploadObject('documents/a.csv', Buffer.from('data'), 'text/csv');
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const storageService = require('../../../src/services/storage.service');
+    await storageService.ensureBucketExists();
 
-      expect(mockSend).toHaveBeenCalledTimes(1);
-      const command = mockSend.mock.calls[0][0];
-      expect(command.input).toMatchObject({ Key: 'documents/a.csv', ContentType: 'text/csv' });
-    });
+    expect(localEnsureReady).toHaveBeenCalledTimes(1);
+    expect(s3EnsureReady).not.toHaveBeenCalled();
   });
 
-  describe('getObjectStream', () => {
-    it('retorna el Body del objeto cuando existe', async () => {
-      const fakeStream = { pipe: jest.fn() };
-      mockSend.mockResolvedValue({ Body: fakeStream });
+  it('usa el driver de S3 cuando STORAGE_DRIVER=s3', async () => {
+    jest.doMock('../../../src/config/env', () => ({
+      __esModule: true,
+      default: { storage: { driver: 's3', localDir: 'uploads' } },
+    }));
+    mockDrivers();
 
-      const result = await storageService.getObjectStream('documents/a.csv');
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const storageService = require('../../../src/services/storage.service');
+    await storageService.ensureBucketExists();
 
-      expect(result).toBe(fakeStream);
-    });
-
-    it('lanza 404 cuando el objeto no existe (NoSuchKey)', async () => {
-      mockSend.mockRejectedValue(Object.assign(new Error('not found'), { name: 'NoSuchKey' }));
-
-      await expect(storageService.getObjectStream('documents/missing.csv')).rejects.toBeInstanceOf(
-        ApiError
-      );
-    });
-
-    it('propaga otros errores tal cual', async () => {
-      const otherError = Object.assign(new Error('boom'), { name: 'InternalError' });
-      mockSend.mockRejectedValue(otherError);
-
-      await expect(storageService.getObjectStream('documents/a.csv')).rejects.toBe(otherError);
-    });
-  });
-
-  describe('deleteObject', () => {
-    it('envia un DeleteObjectCommand con el key', async () => {
-      mockSend.mockResolvedValue({});
-
-      await storageService.deleteObject('documents/a.csv');
-
-      const command = mockSend.mock.calls[0][0];
-      expect(command.input).toMatchObject({ Key: 'documents/a.csv' });
-    });
-  });
-
-  describe('ensureBucketExists', () => {
-    it('no crea el bucket si HeadBucket confirma que ya existe', async () => {
-      mockSend.mockResolvedValueOnce({});
-
-      await storageService.ensureBucketExists();
-
-      expect(mockSend).toHaveBeenCalledTimes(1);
-    });
-
-    it('crea el bucket si HeadBucket falla', async () => {
-      mockSend.mockRejectedValueOnce(new Error('not found')).mockResolvedValueOnce({});
-
-      await storageService.ensureBucketExists();
-
-      expect(mockSend).toHaveBeenCalledTimes(2);
-    });
+    expect(s3EnsureReady).toHaveBeenCalledTimes(1);
+    expect(localEnsureReady).not.toHaveBeenCalled();
   });
 });

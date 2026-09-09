@@ -109,6 +109,13 @@ body {
   margin-top: 6px;
 }
 
+.field-hint {
+  color: var(--color-text-muted);
+  font-size: 11px;
+  margin-top: 8px;
+  line-height: 1.5;
+}
+
 .radio-group {
   display: flex;
   gap: 16px;
