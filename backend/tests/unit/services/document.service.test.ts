@@ -39,11 +39,11 @@ describe('document.service', () => {
   describe('uploadDocument', () => {
     it('sube el CSV a S3 y guarda el documento y sus registros cuando es valido', async () => {
       mockedParse.mockReturnValue([
-        { correo: 'a@a.com', nombre: 'A', telefono: '123', ciudad: 'Lima', notas: null },
+        { email: 'a@a.com', fullName: 'A', phone: '123', city: 'Lima', notes: null },
       ]);
       mockedStorage.uploadObject.mockResolvedValue(undefined);
       mockedDocument.create.mockResolvedValue({ id: 10 });
-      mockedDocument.findByPk.mockResolvedValue({ id: 10, nombreOriginal: 'clientes.csv' });
+      mockedDocument.findByPk.mockResolvedValue({ id: 10, originalName: 'clientes.csv' });
 
       const result = await documentService.uploadDocument({ file: fakeFile, userId: 7 });
 
@@ -53,14 +53,14 @@ describe('document.service', () => {
         'text/csv'
       );
       expect(mockedDocument.create).toHaveBeenCalledWith(
-        expect.objectContaining({ nombreOriginal: 'clientes.csv', usuarioId: 7, numRegistros: 1 }),
+        expect.objectContaining({ originalName: 'clientes.csv', userId: 7, recordCount: 1 }),
         expect.anything()
       );
       expect(mockedRecord.bulkCreate).toHaveBeenCalledWith(
-        [expect.objectContaining({ correo: 'a@a.com', documentId: 10 })],
+        [expect.objectContaining({ email: 'a@a.com', documentId: 10 })],
         expect.anything()
       );
-      expect(result).toEqual({ id: 10, nombreOriginal: 'clientes.csv' });
+      expect(result).toEqual({ id: 10, originalName: 'clientes.csv' });
     });
 
     it('no sube nada a S3 si el CSV es invalido', async () => {
@@ -79,7 +79,7 @@ describe('document.service', () => {
 
     it('borra el objeto de S3 (compensacion) si la transaccion de BD falla', async () => {
       mockedParse.mockReturnValue([
-        { correo: 'a@a.com', nombre: 'A', telefono: '123', ciudad: 'Lima', notas: null },
+        { email: 'a@a.com', fullName: 'A', phone: '123', city: 'Lima', notes: null },
       ]);
       mockedStorage.uploadObject.mockResolvedValue(undefined);
       mockedStorage.deleteObject.mockResolvedValue(undefined);
@@ -105,19 +105,18 @@ describe('document.service', () => {
       });
     });
 
-    it('destruye el documento y borra el objeto de S3', async () => {
+    it('hace un borrado logico (destroy) y NO toca el archivo en el storage', async () => {
       const destroy = jest.fn().mockResolvedValue(undefined);
       mockedDocument.findByPk.mockResolvedValue({
         id: 5,
-        rutaArchivo: 'documents/x.csv',
+        storageKey: 'documents/x.csv',
         destroy,
       });
-      mockedStorage.deleteObject.mockResolvedValue(undefined);
 
       await documentService.deleteDocument(5);
 
       expect(destroy).toHaveBeenCalled();
-      expect(mockedStorage.deleteObject).toHaveBeenCalledWith('documents/x.csv');
+      expect(mockedStorage.deleteObject).not.toHaveBeenCalled();
     });
   });
 });

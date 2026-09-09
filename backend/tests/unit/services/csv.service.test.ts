@@ -17,13 +17,13 @@ describe('csv.service - parseAndValidateCsv', () => {
 
     expect(rows).toHaveLength(2);
     expect(rows[0]).toEqual({
-      correo: 'juan@example.com',
-      nombre: 'Juan Perez',
-      telefono: '612345678',
-      ciudad: 'Madrid',
-      notas: 'vip',
+      email: 'juan@example.com',
+      fullName: 'Juan Perez',
+      phone: '612345678',
+      city: 'Madrid',
+      notes: 'vip',
     });
-    expect(rows[1].notas).toBeNull();
+    expect(rows[1].notes).toBeNull();
   });
 
   it.each([

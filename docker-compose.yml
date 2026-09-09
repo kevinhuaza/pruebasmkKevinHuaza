@@ -16,12 +16,13 @@ services:
       timeout: 5s
       retries: 10
 
-  # Emulador de S3, SOLO para quien no tenga una cuenta de AWS a mano.
-  # No se levanta con `docker compose up` por defecto (requiere el profile "local"):
+  # Emulador de S3, SOLO relevante si pones STORAGE_DRIVER=s3 y no tienes una
+  # cuenta de AWS a mano. No se levanta con `docker compose up` por defecto
+  # (requiere el profile "local"):
   #   docker compose --profile local up
-  # y en ese caso el .env debe apuntar S3_ENDPOINT a http://localstack:4566.
-  # Por defecto (sin profile) el backend habla directo con el S3 real de AWS
-  # usando las credenciales/bucket definidos en .env.
+  # y en ese caso el .env debe tener STORAGE_DRIVER=s3 y S3_ENDPOINT=http://localstack:4566.
+  # Por defecto (sin profile, sin tocar nada) el backend guarda los archivos
+  # en disco local (STORAGE_DRIVER=local) y este servicio ni se crea.
   localstack:
     image: localstack/localstack:3
     restart: unless-stopped
@@ -59,15 +60,20 @@ services:
       JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-8h}
       CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:5173}
       MAX_FILE_SIZE_MB: ${MAX_FILE_SIZE_MB:-5}
-      AWS_REGION: ${AWS_REGION:?AWS_REGION debe definirse en el archivo .env}
-      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:?AWS_ACCESS_KEY_ID debe definirse en el archivo .env}
-      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:?AWS_SECRET_ACCESS_KEY debe definirse en el archivo .env}
-      S3_BUCKET_NAME: ${S3_BUCKET_NAME:?S3_BUCKET_NAME debe definirse en el archivo .env}
-      # Vacios por defecto = S3 real de AWS. Solo se completan con el profile "local".
+      # 'local' (por defecto): guarda los CSV en un volumen del contenedor,
+      # cero configuracion adicional. 'S3': usa las variables AWS_*/S3_* de abajo.
+      STORAGE_DRIVER: ${STORAGE_DRIVER:-local}
+      UPLOAD_DIR: uploads
+      AWS_REGION: ${AWS_REGION:-us-east-1}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:-}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:-}
+      S3_BUCKET_NAME: ${S3_BUCKET_NAME:-csv-manager-documents}
       S3_ENDPOINT: ${S3_ENDPOINT:-}
       S3_FORCE_PATH_STYLE: ${S3_FORCE_PATH_STYLE:-false}
     ports:
       - "4000:4000"
+    volumes:
+      - ./backend/uploads:/app/uploads
 
   frontend:
     build:

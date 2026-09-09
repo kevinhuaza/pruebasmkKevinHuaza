@@ -16,14 +16,14 @@ function checkValidation(req: Request): void {
 
 export const register = catchAsync(async (req: Request, res: Response) => {
   checkValidation(req);
-  const { nombre, password, rol } = req.body;
-  const user = await authService.register({ nombre, password, rol });
+  const { username, password, role } = req.body;
+  const user = await authService.register({ username, password, role });
   res.status(201).json({ success: true, data: user });
 });
 
 export const login = catchAsync(async (req: Request, res: Response) => {
   checkValidation(req);
-  const { nombre, password } = req.body;
-  const result = await authService.login({ nombre, password });
+  const { username, password } = req.body;
+  const result = await authService.login({ username, password });
   res.status(200).json({ success: true, data: result });
 });

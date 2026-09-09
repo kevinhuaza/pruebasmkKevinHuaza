@@ -10,6 +10,8 @@ function required(name: string, fallback?: string): string {
   return value;
 }
 
+export type StorageDriverName = 'local' | 's3';
+
 export interface EnvConfig {
   nodeEnv: string;
   port: number;
@@ -29,6 +31,10 @@ export interface EnvConfig {
   };
   upload: {
     maxFileSizeMb: number;
+  };
+  storage: {
+    driver: StorageDriverName;
+    localDir: string;
   };
   aws: {
     region: string;
@@ -65,12 +71,20 @@ const env: EnvConfig = {
     maxFileSizeMb: Number(process.env.MAX_FILE_SIZE_MB) || 5,
   },
 
+  // 'local' (por defecto): guarda los archivos en un directorio del propio
+  // contenedor/servidor, cero configuracion adicional. 'S3': usa AWS real
+  // (o LocalStack), ver seccion S3 mas abajo y el README.
+  storage: {
+    driver: (process.env.STORAGE_DRIVER === 's3' ? 's3' : 'local') as StorageDriverName,
+    localDir: process.env.UPLOAD_DIR || 'uploads',
+  },
+
+  
   aws: {
     region: process.env.AWS_REGION || 'us-east-1',
     accessKeyId: process.env.AWS_ACCESS_KEY_ID,
     secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-    bucket: required('S3_BUCKET_NAME', 'csv-manager-documents'),
-    // S3_ENDPOINT: dejar vacio para AWS real; se usa para apuntar a LocalStack en local/Docker.
+    bucket: required('S3_BUCKET_NAME', 'csv-manager-documents'),   
     endpoint: process.env.S3_ENDPOINT || undefined,
     forcePathStyle: (process.env.S3_FORCE_PATH_STYLE || 'false') === 'true',
   },

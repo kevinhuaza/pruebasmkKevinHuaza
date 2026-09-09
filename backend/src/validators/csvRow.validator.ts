@@ -9,11 +9,11 @@ export interface CsvRawRow {
 }
 
 export interface CsvValidRow {
-  correo: string;
-  nombre: string;
-  telefono: string;
-  ciudad: string;
-  notas: string | null;
+  email: string;
+  fullName: string;
+  phone: string;
+  city: string;
+  notes: string | null;
 }
 
 export interface CsvFieldError {
@@ -82,6 +82,12 @@ export function validateRow(row: CsvRawRow, rowNumber: number): CsvRowValidation
 
   return {
     valid: true,
-    data: { correo, nombre, telefono, ciudad, notas: notas || null },
+    data: {
+      email: correo,
+      fullName: nombre,
+      phone: telefono,
+      city: ciudad,
+      notes: notas || null,
+    },
   };
 }

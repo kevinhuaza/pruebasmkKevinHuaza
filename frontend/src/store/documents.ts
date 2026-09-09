@@ -44,7 +44,7 @@ export const useDocumentsStore = defineStore('documents', {
       const response = await apiClient.get(`/documents/${doc.id}/download`, {
         responseType: 'blob',
       });
-      downloadBlob(new Blob([response.data]), doc.nombreOriginal);
+      downloadBlob(new Blob([response.data]), doc.originalName);
     },
 
     async downloadTemplate(): Promise<void> {

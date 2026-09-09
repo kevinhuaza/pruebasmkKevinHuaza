@@ -16,7 +16,15 @@ COPY package*.json ./
 RUN npm install --omit=dev
 
 COPY --from=build /app/dist ./dist
+COPY .sequelizerc ./
+COPY config ./config
+COPY migrations ./migrations
+
+RUN mkdir -p uploads
 
 EXPOSE 4000
 
-CMD ["node", "dist/server.js"]
+# Aplica las migraciones pendientes contra la base de datos y recien
+# despues arranca el servidor. Asi "docker compose up" deja el esquema
+# listo sin ningun paso manual.
+CMD ["sh", "-c", "npx sequelize-cli db:migrate --env production && node dist/server.js"]

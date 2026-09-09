@@ -10,43 +10,43 @@ const mockedAuthService = authService as jest.Mocked<typeof authService>;
 describe('POST /api/auth/register', () => {
   it('retorna 400 si las contrasenas no coinciden', async () => {
     const res = await request(app).post('/api/auth/register').send({
-      nombre: 'juan',
+      username: 'juan',
       password: 'secret123',
-      confirmarContrasena: 'otra123',
-      rol: 'user',
+      confirmPassword: 'otra123',
+      role: 'user',
     });
 
     expect(res.status).toBe(400);
     expect(res.body.success).toBe(false);
     expect(res.body.details).toEqual(
-      expect.arrayContaining([expect.objectContaining({ field: 'confirmarContrasena' })])
+      expect.arrayContaining([expect.objectContaining({ field: 'confirmPassword' })])
     );
     expect(mockedAuthService.register).not.toHaveBeenCalled();
   });
 
   it('retorna 400 si el rol no es valido', async () => {
     const res = await request(app).post('/api/auth/register').send({
-      nombre: 'juan',
+      username: 'juan',
       password: 'secret123',
-      confirmarContrasena: 'secret123',
-      rol: 'superadmin',
+      confirmPassword: 'secret123',
+      role: 'superadmin',
     });
 
     expect(res.status).toBe(400);
   });
 
   it('retorna 201 y delega en el servicio cuando los datos son validos', async () => {
-    mockedAuthService.register.mockResolvedValue({ id: 1, nombre: 'juan', rol: 'user' });
+    mockedAuthService.register.mockResolvedValue({ id: 1, username: 'juan', role: 'user' });
 
     const res = await request(app).post('/api/auth/register').send({
-      nombre: 'juan',
+      username: 'juan',
       password: 'secret123',
-      confirmarContrasena: 'secret123',
-      rol: 'user',
+      confirmPassword: 'secret123',
+      role: 'user',
     });
 
     expect(res.status).toBe(201);
-    expect(res.body.data).toEqual({ id: 1, nombre: 'juan', rol: 'user' });
+    expect(res.body.data).toEqual({ id: 1, username: 'juan', role: 'user' });
   });
 });
 
@@ -62,7 +62,7 @@ describe('POST /api/auth/login', () => {
 
     const res = await request(app)
       .post('/api/auth/login')
-      .send({ nombre: 'juan', password: 'incorrecta' });
+      .send({ username: 'juan', password: 'incorrecta' });
 
     expect(res.status).toBe(401);
     expect(res.body.success).toBe(false);
@@ -71,12 +71,12 @@ describe('POST /api/auth/login', () => {
   it('retorna 200 con token cuando las credenciales son correctas', async () => {
     mockedAuthService.login.mockResolvedValue({
       token: 'jwt-token',
-      user: { id: 1, nombre: 'juan', rol: 'user' },
+      user: { id: 1, username: 'juan', role: 'user' },
     });
 
     const res = await request(app)
       .post('/api/auth/login')
-      .send({ nombre: 'juan', password: 'secret123' });
+      .send({ username: 'juan', password: 'secret123' });
 
     expect(res.status).toBe(200);
     expect(res.body.data.token).toBe('jwt-token');

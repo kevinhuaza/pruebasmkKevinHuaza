@@ -46,19 +46,24 @@ const swaggerSpec = {
       },
       RegisterRequest: {
         type: 'object',
-        required: ['nombre', 'password', 'confirmarContrasena', 'rol'],
+        required: ['username', 'password', 'confirmPassword', 'role'],
         properties: {
-          nombre: { type: 'string', minLength: 3, maxLength: 80, example: 'juan_perez' },
+          username: { type: 'string', minLength: 3, maxLength: 80, example: 'juan_perez' },
           password: { type: 'string', minLength: 6, example: 'secret123' },
-          confirmarContrasena: { type: 'string', minLength: 6, example: 'secret123' },
-          rol: { type: 'string', enum: ['user', 'admin'], example: 'user' },
+          confirmPassword: { type: 'string', minLength: 6, example: 'secret123' },
+          role: {
+            type: 'string',
+            enum: ['user', 'admin'],
+            description:
+'No se permite crear administradores desde el registro público. Solo el primer usuario del sistema puede ser administrador. Todos los usuarios creados después tendrán el rol "user".',
+          },
         },
       },
       LoginRequest: {
         type: 'object',
-        required: ['nombre', 'password'],
+        required: ['username', 'password'],
         properties: {
-          nombre: { type: 'string', example: 'juan_perez' },
+          username: { type: 'string', example: 'juan_perez' },
           password: { type: 'string', example: 'secret123' },
         },
       },
@@ -66,8 +71,8 @@ const swaggerSpec = {
         type: 'object',
         properties: {
           id: { type: 'integer', example: 1 },
-          nombre: { type: 'string', example: 'juan_perez' },
-          rol: { type: 'string', enum: ['user', 'admin'], example: 'user' },
+          username: { type: 'string', example: 'juan_perez' },
+          role: { type: 'string', enum: ['user', 'admin'], example: 'user' },
         },
       },
       LoginResponseData: {
@@ -81,17 +86,17 @@ const swaggerSpec = {
         type: 'object',
         properties: {
           id: { type: 'integer', example: 1 },
-          nombreOriginal: { type: 'string', example: 'clientes.csv' },
-          nombreAlmacenado: { type: 'string', example: 'a1b2c3d4.csv' },
-          rutaArchivo: { type: 'string', example: '/app/uploads/a1b2c3d4.csv' },
-          numRegistros: { type: 'integer', example: 3 },
-          usuarioId: { type: 'integer', example: 1 },
-          fecha_carga: { type: 'string', format: 'date-time' },
-          usuario: {
+          originalName: { type: 'string', example: 'clientes.csv' },
+          storedName: { type: 'string', example: 'a1b2c3d4.csv' },
+          storageKey: { type: 'string', example: 'documents/a1b2c3d4.csv' },
+          recordCount: { type: 'integer', example: 3 },
+          userId: { type: 'integer', example: 1 },
+          uploadedAt: { type: 'string', format: 'date-time' },
+          uploadedBy: {
             type: 'object',
             properties: {
               id: { type: 'integer', example: 1 },
-              nombre: { type: 'string', example: 'juan_perez' },
+              username: { type: 'string', example: 'juan_perez' },
             },
           },
         },

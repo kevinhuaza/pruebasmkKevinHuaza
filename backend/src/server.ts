@@ -1,14 +1,15 @@
 import app from './app';
 import env from './config/env';
-import { sequelize, connectWithRetry } from './config/database';
+import { connectWithRetry } from './config/database';
 import { ensureBucketExists } from './services/storage.service';
 import { ensureTemplateExists } from './services/template.service';
 import './models';
 
 async function start(): Promise<void> {
   await connectWithRetry();
-  await sequelize.sync();
-  console.log('Modelos sincronizados con la base de datos.');
+  // El esquema lo crean las migraciones versionadas (backend/migrations),
+  // no sequelize.sync(). En Docker corren solas al arrancar el contenedor
+  // (ver Dockerfile); en desarrollo local: npm run migrate.
 
   await ensureBucketExists();
   await ensureTemplateExists();

@@ -31,25 +31,25 @@ describe('csvRow.validator - validateRow', () => {
     notas: 'cliente vip',
   };
 
-  it('acepta una fila completamente valida', () => {
+  it('acepta una fila completamente valida y la traduce a ingles', () => {
     const result = validateRow(baseRow, 2);
     expect(result.valid).toBe(true);
     if (result.valid) {
       expect(result.data).toEqual({
-        correo: 'juan@example.com',
-        nombre: 'Juan Perez',
-        telefono: '+34 612345678',
-        ciudad: 'Madrid',
-        notas: 'cliente vip',
+        email: 'juan@example.com',
+        fullName: 'Juan Perez',
+        phone: '+34 612345678',
+        city: 'Madrid',
+        notes: 'cliente vip',
       });
     }
   });
 
-  it('permite que "notas" sea opcional (null si viene vacio)', () => {
+  it('permite que "notas" sea opcional (notes queda null si viene vacio)', () => {
     const result = validateRow({ ...baseRow, notas: '' }, 2);
     expect(result.valid).toBe(true);
     if (result.valid) {
-      expect(result.data.notas).toBeNull();
+      expect(result.data.notes).toBeNull();
     }
   });
 

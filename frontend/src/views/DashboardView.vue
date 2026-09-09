@@ -3,8 +3,8 @@
     <header class="app-header">
       <app-logo />
       <div class="user-badge">
-        <span>{{ authStore.user?.nombre }}</span>
-        <span class="role-pill">{{ authStore.user?.rol }}</span>
+        <span>{{ authStore.user?.username }}</span>
+        <span class="role-pill">{{ roleLabel }}</span>
         <button class="btn btn-secondary btn-sm" @click="handleLogout">Salir</button>
       </div>
     </header>
@@ -87,6 +87,11 @@ export default defineComponent({
       } as UploadResultState,
     };
   },
+  computed: {
+    roleLabel(): string {
+      return this.authStore.user?.role === 'admin' ? 'Administrador' : 'Usuario';
+    },
+  },
   async mounted() {
     await this.loadDocuments();
   },
@@ -113,7 +118,7 @@ export default defineComponent({
         this.uploadResult = {
           visible: true,
           status: 'success',
-          message: `El archivo "${file.name}" se cargo correctamente con ${document.numRegistros} registro(s).`,
+          message: `El archivo "${file.name}" se cargo correctamente con ${document.recordCount} registro(s).`,
           details: [],
           errorCsvText: null,
           errorCsvFilename: '',
@@ -174,7 +179,7 @@ export default defineComponent({
     },
     async handleDelete(doc: CsvDocument): Promise<void> {
       this.clearMessages();
-      if (!confirm(`Eliminar el documento "${doc.nombreOriginal}"? Esta accion no se puede deshacer.`)) {
+      if (!confirm(`Eliminar el documento "${doc.originalName}"? Esta accion no se puede deshacer.`)) {
         return;
       }
       try {

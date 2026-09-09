@@ -10,7 +10,7 @@ export interface UploadDocumentInput {
 }
 
 export async function uploadDocument({ file, userId }: UploadDocumentInput): Promise<Document> {
-  // Se valida en memoria antes de tocar S3: si el CSV es invalido no se sube nada.
+  // Se valida en memoria antes de tocar el storage: si el CSV es invalido no se sube nada.
   const validRows = parseAndValidateCsv(file.buffer);
 
   const objectKey = `documents/${uuidv4()}.csv`;
@@ -20,11 +20,11 @@ export async function uploadDocument({ file, userId }: UploadDocumentInput): Pro
     const document = await sequelize.transaction(async (t) => {
       const doc = await Document.create(
         {
-          nombreOriginal: file.originalname,
-          nombreAlmacenado: objectKey.split('/').pop() as string,
-          rutaArchivo: objectKey,
-          numRegistros: validRows.length,
-          usuarioId: userId,
+          originalName: file.originalname,
+          storedName: objectKey.split('/').pop() as string,
+          storageKey: objectKey,
+          recordCount: validRows.length,
+          userId,
         },
         { transaction: t }
       );
@@ -37,8 +37,8 @@ export async function uploadDocument({ file, userId }: UploadDocumentInput): Pro
 
     return getDocumentById(document.id);
   } catch (error) {
-    // Compensacion: si la transaccion de BD falla despues de subir a S3,
-    // no dejamos el objeto huerfano en el bucket.
+    // Compensacion: si la transaccion de BD falla despues de subir el archivo,
+    // no dejamos el objeto huerfano en el storage.
     await storageService.deleteObject(objectKey).catch(() => undefined);
     throw error;
   }
@@ -46,14 +46,14 @@ export async function uploadDocument({ file, userId }: UploadDocumentInput): Pro
 
 export async function listDocuments(): Promise<Document[]> {
   return Document.findAll({
-    include: [{ model: User, as: 'usuario', attributes: ['id', 'nombre'] }],
-    order: [['fecha_carga', 'DESC']],
+    include: [{ model: User, as: 'uploadedBy', attributes: ['id', 'username'] }],
+    order: [['uploadedAt', 'DESC']],
   });
 }
 
 export async function getDocumentById(id: number | string): Promise<Document> {
   const document = await Document.findByPk(id, {
-    include: [{ model: User, as: 'usuario', attributes: ['id', 'nombre'] }],
+    include: [{ model: User, as: 'uploadedBy', attributes: ['id', 'username'] }],
   });
   if (!document) {
     throw ApiError.notFound('Documento no encontrado');
@@ -65,10 +65,6 @@ export async function deleteDocument(id: number | string): Promise<void> {
   const document = await Document.findByPk(id);
   if (!document) {
     throw ApiError.notFound('Documento no encontrado');
-  }
-
+  }  
   await document.destroy();
-  await storageService.deleteObject(document.rutaArchivo).catch((error) => {
-    console.error(`No se pudo eliminar el objeto S3 ${document.rutaArchivo}:`, error);
-  });
 }

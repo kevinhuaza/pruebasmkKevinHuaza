@@ -7,20 +7,20 @@ import ApiError from '../utils/ApiError';
 const SALT_ROUNDS = 12;
 
 export interface RegisterInput {
-  nombre: string;
+  username: string;
   password: string;
-  rol: UserRole;
+  role: UserRole;
 }
 
 export interface LoginInput {
-  nombre: string;
+  username: string;
   password: string;
 }
 
 export interface PublicUser {
   id: number;
-  nombre: string;
-  rol: UserRole;
+  username: string;
+  role: UserRole;
 }
 
 export interface LoginResult {
@@ -28,21 +28,24 @@ export interface LoginResult {
   user: PublicUser;
 }
 
-export async function register({ nombre, password, rol }: RegisterInput): Promise<PublicUser> {
-  const existing = await User.findOne({ where: { nombre } });
+export async function register({ username, password, role }: RegisterInput): Promise<PublicUser> {
+  const existing = await User.findOne({ where: { username } });
   if (existing) {
     throw ApiError.conflict('Ya existe un usuario con ese nombre');
   }
 
+   const isFirstUser = (await User.count()) === 0;
+  const finalRole: UserRole = isFirstUser ? role : 'user';
+
   const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);
 
-  const user = await User.create({ nombre, password: hashedPassword, rol });
+  const user = await User.create({ username, password: hashedPassword, role: finalRole });
 
-  return { id: user.id, nombre: user.nombre, rol: user.rol };
+  return { id: user.id, username: user.username, role: user.role };
 }
 
-export async function login({ nombre, password }: LoginInput): Promise<LoginResult> {
-  const user = await User.findOne({ where: { nombre } });
+export async function login({ username, password }: LoginInput): Promise<LoginResult> {
+  const user = await User.findOne({ where: { username } });
   if (!user) {
     throw ApiError.unauthorized('Credenciales invalidas');
   }
@@ -52,10 +55,10 @@ export async function login({ nombre, password }: LoginInput): Promise<LoginResu
     throw ApiError.unauthorized('Credenciales invalidas');
   }
 
-  const token = signToken({ sub: user.id, rol: user.rol });
+  const token = signToken({ sub: user.id, role: user.role });
 
   return {
     token,
-    user: { id: user.id, nombre: user.nombre, rol: user.rol },
+    user: { id: user.id, username: user.username, role: user.role },
   };
 }

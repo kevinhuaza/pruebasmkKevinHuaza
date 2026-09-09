@@ -15,7 +15,7 @@ export const useAuthStore = defineStore('auth', {
 
   getters: {
     isAuthenticated: (state): boolean => Boolean(state.token),
-    isAdmin: (state): boolean => state.user?.rol === 'admin',
+    isAdmin: (state): boolean => state.user?.role === 'admin',
   },
 
   actions: {
@@ -24,8 +24,8 @@ export const useAuthStore = defineStore('auth', {
       return data.data as AuthUser;
     },
 
-    async login({ nombre, password }: LoginPayload): Promise<void> {
-      const { data } = await apiClient.post('/auth/login', { nombre, password });
+    async login({ username, password }: LoginPayload): Promise<void> {
+      const { data } = await apiClient.post('/auth/login', { username, password });
       const { token, user } = data.data as { token: string; user: AuthUser };
 
       this.token = token;

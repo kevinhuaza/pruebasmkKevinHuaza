@@ -2,8 +2,8 @@ import 'express';
 
 export interface AuthenticatedUser {
   id: number;
-  nombre: string;
-  rol: 'user' | 'admin';
+  username: string;
+  role: 'user' | 'admin';
 }
 
 declare global {

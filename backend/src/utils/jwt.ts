@@ -3,7 +3,7 @@ import env from '../config/env';
 
 export interface JwtPayload {
   sub: number;
-  rol: 'user' | 'admin';
+  role: 'user' | 'admin';
 }
 
 export function signToken(payload: JwtPayload): string {

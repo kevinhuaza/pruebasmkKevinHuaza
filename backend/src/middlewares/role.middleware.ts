@@ -8,7 +8,7 @@ export default function authorize(...allowedRoles: UserRole[]) {
       next(ApiError.unauthorized());
       return;
     }
-    if (!allowedRoles.includes(req.user.rol)) {
+    if (!allowedRoles.includes(req.user.role)) {
       next(ApiError.forbidden('No tienes permisos para realizar esta accion'));
       return;
     }

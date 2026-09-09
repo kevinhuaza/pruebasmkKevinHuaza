@@ -7,7 +7,7 @@ describe('role.middleware (RBAC)', () => {
   }
 
   it('llama a next() sin argumentos cuando el rol esta permitido', () => {
-    const req = { user: { id: 1, nombre: 'admin', rol: 'admin' } } as unknown as Request;
+    const req = { user: { id: 1, username: 'admin', role: 'admin' } } as unknown as Request;
     const next = jest.fn();
 
     authorize('admin')(req, mockRes(), next);
@@ -16,7 +16,7 @@ describe('role.middleware (RBAC)', () => {
   });
 
   it('llama a next(error 403) cuando el rol no esta permitido', () => {
-    const req = { user: { id: 2, nombre: 'user', rol: 'user' } } as unknown as Request;
+    const req = { user: { id: 2, username: 'user', role: 'user' } } as unknown as Request;
     const next = jest.fn();
 
     authorize('admin')(req, mockRes(), next);
@@ -37,7 +37,7 @@ describe('role.middleware (RBAC)', () => {
   });
 
   it('permite multiples roles autorizados', () => {
-    const req = { user: { id: 3, nombre: 'user', rol: 'user' } } as unknown as Request;
+    const req = { user: { id: 3, username: 'user', role: 'user' } } as unknown as Request;
     const next = jest.fn();
 
     authorize('user', 'admin')(req, mockRes(), next);
